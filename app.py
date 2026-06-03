@@ -176,9 +176,17 @@ uploaded_file = st.file_uploader(
 )
 
 
+import os
+
 if uploaded_file:
 
-    pdf_path = f"data/{uploaded_file.name}"
+    # Create data folder if it doesn't exist
+    os.makedirs("data", exist_ok=True)
+
+    pdf_path = os.path.join(
+        "data",
+        uploaded_file.name
+    )
 
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
