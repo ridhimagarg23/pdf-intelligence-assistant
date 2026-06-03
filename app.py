@@ -1,4 +1,4 @@
-'''
+
 import streamlit as st
 
 from src.parser import extract_document
@@ -370,14 +370,3 @@ Content:
 
         st.exception(e)
 
-'''
-
-import streamlit as st
-
-st.title("Upload Test")
-
-file = st.file_uploader("Upload PDF")
-
-if file:
-    st.success("Upload Works")
-    st.write(file.name)
