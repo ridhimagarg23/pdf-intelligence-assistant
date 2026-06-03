@@ -1,16 +1,8 @@
-import fitz
+from docling.document_converter import DocumentConverter
 
 def extract_document(pdf_path):
 
-    doc = fitz.open(pdf_path)
+    converter = DocumentConverter()
+    result = converter.convert(pdf_path)
 
-    text = ""
-
-    for page in doc:
-
-        text += page.get_text()
-        text += "\n"
-
-    doc.close()
-
-    return text
+    return result.document
