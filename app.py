@@ -186,105 +186,135 @@ uploaded_file = st.file_uploader(
     type=["pdf"]
 )
 
-
 import os
 
 if uploaded_file:
 
-    # Create data folder if it doesn't exist
-    os.makedirs("data", exist_ok=True)
+    try:
 
-    pdf_path = os.path.join(
-        "data",
-        uploaded_file.name
-    )
+        # -----------------------------
+        # SAVE PDF
+        # -----------------------------
 
-    with open(pdf_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+        os.makedirs("data", exist_ok=True)
 
-    with st.spinner("Processing PDF..."):
-
-        document = extract_document(pdf_path)
-
-        sections = build_sections(document)
-
-    # ------------------------------------------
-    # EMBEDDING MODEL
-    # ------------------------------------------
-
-    if "embedding_model" not in st.session_state:
-
-        with st.spinner("Loading embedding model..."):
-
-            st.session_state.embedding_model = (
-                load_embedding_model()
-            )
-
-    # ------------------------------------------
-    # VECTOR STORE
-    # ------------------------------------------
-
-    if (
-        "index" not in st.session_state
-        or st.session_state.get("current_pdf")
-        != uploaded_file.name
-    ):
-
-        with st.spinner("Building knowledge base..."):
-
-            chunk_texts = create_chunk_texts(
-                sections
-            )
-
-            embeddings = create_embeddings(
-                st.session_state.embedding_model,
-                chunk_texts
-            )
-
-            st.session_state.index = create_index(
-                embeddings
-            )
-
-            st.session_state.sections = sections
-
-            st.session_state.current_pdf = (
-                uploaded_file.name
-            )
-
-    st.success("PDF processed successfully.")
-
-    st.caption(
-        f" {uploaded_file.name}"
-    )
-
-    st.divider()
-
-    # ------------------------------------------
-    # QUESTION INPUT
-    # ------------------------------------------
-
-    query = st.text_input(
-        "Ask a question about the document"
-    )
-
-    if query:
-
-        retrieved_ids, scores = retrieve(
-            query,
-            st.session_state.embedding_model,
-            st.session_state.index,
-            top_k=5
+        pdf_path = os.path.join(
+            "data",
+            uploaded_file.name
         )
 
-        context = ""
+        with open(pdf_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-        sources = []
+        st.success("PDF uploaded successfully")
 
-        for idx in retrieved_ids:
+        # -----------------------------
+        # DOCLING PARSING
+        # -----------------------------
 
-            section = st.session_state.sections[idx]
+        with st.spinner("Parsing PDF..."):
 
-            context += f"""
+            document = extract_document(pdf_path)
+
+        st.success("PDF parsed successfully")
+
+        # -----------------------------
+        # CHUNKING
+        # -----------------------------
+
+        with st.spinner("Creating chunks..."):
+
+            sections = build_sections(document)
+
+        st.success(
+            f"Knowledge chunks created: {len(sections)}"
+        )
+
+        # -----------------------------
+        # EMBEDDING MODEL
+        # -----------------------------
+
+        if "embedding_model" not in st.session_state:
+
+            with st.spinner(
+                "Loading BGE-M3 model..."
+            ):
+
+                st.session_state.embedding_model = (
+                    load_embedding_model()
+                )
+
+        # -----------------------------
+        # VECTOR STORE
+        # -----------------------------
+
+        if (
+            "index" not in st.session_state
+            or st.session_state.get("current_pdf")
+            != uploaded_file.name
+        ):
+
+            with st.spinner(
+                "Building vector database..."
+            ):
+
+                chunk_texts = create_chunk_texts(
+                    sections
+                )
+
+                embeddings = create_embeddings(
+                    st.session_state.embedding_model,
+                    chunk_texts
+                )
+
+                st.session_state.index = create_index(
+                    embeddings
+                )
+
+                st.session_state.sections = sections
+
+                st.session_state.current_pdf = (
+                    uploaded_file.name
+                )
+
+        st.success(
+            "Document knowledge base ready"
+        )
+
+        st.caption(
+            f"Current Document: {uploaded_file.name}"
+        )
+
+        st.divider()
+
+        # -----------------------------
+        # QUESTION INPUT
+        # -----------------------------
+
+        query = st.text_input(
+            "Ask a question about the document"
+        )
+
+        if query:
+
+            retrieved_ids, scores = retrieve(
+                query,
+                st.session_state.embedding_model,
+                st.session_state.index,
+                top_k=5
+            )
+
+            context = ""
+
+            sources = []
+
+            for idx in retrieved_ids:
+
+                section = (
+                    st.session_state.sections[idx]
+                )
+
+                context += f"""
 
 Heading:
 {section['heading']}
@@ -294,34 +324,48 @@ Content:
 
 """
 
-            sources.append(
-                section["heading"]
+                sources.append(
+                    section["heading"]
+                )
+
+            with st.spinner(
+                "Generating answer..."
+            ):
+
+                answer = generate_answer(
+                    query,
+                    context
+                )
+
+            st.markdown("## Answer")
+
+            st.markdown(
+                f"""
+                <div class="answer-card">
+                {answer}
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-        with st.spinner("Generating answer..."):
+            with st.expander(
+                "Sources Used"
+            ):
 
-            answer = generate_answer(
-                query,
-                context
-            )
+                unique_sources = list(
+                    dict.fromkeys(sources)
+                )
 
-        st.markdown("## Answer")
+                for source in unique_sources:
 
-        st.markdown(
-            f"""
-            <div class="answer-card">
-            {answer}
-            </div>
-            """,
-            unsafe_allow_html=True
+                    st.write(
+                        f"• {source}"
+                    )
+
+    except Exception as e:
+
+        st.error(
+            f"ERROR: {str(e)}"
         )
 
-        with st.expander("Sources Used"):
-
-            unique_sources = list(
-                dict.fromkeys(sources)
-            )
-
-            for source in unique_sources:
-
-                st.write(f"• {source}")
+        st.exception(e)
