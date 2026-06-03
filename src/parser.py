@@ -1,10 +1,16 @@
-from docling.document_converter import DocumentConverter
-
+import fitz
 
 def extract_document(pdf_path):
 
-    converter = DocumentConverter()
+    doc = fitz.open(pdf_path)
 
-    result = converter.convert(pdf_path)
+    text = ""
 
-    return result.document.export_to_markdown()
+    for page in doc:
+
+        text += page.get_text()
+        text += "\n"
+
+    doc.close()
+
+    return text
