@@ -13,6 +13,4 @@ google-generativeai
 
 python-dotenv
 
-opencv-python-headless
-
 pymupdf
