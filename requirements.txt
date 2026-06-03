@@ -1,7 +1,6 @@
 streamlit
 
 docling
-
 docling-core
 
 sentence-transformers
@@ -13,3 +12,5 @@ numpy
 google-generativeai
 
 python-dotenv
+
+opencv-python-headless
