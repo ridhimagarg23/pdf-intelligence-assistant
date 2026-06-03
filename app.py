@@ -71,13 +71,24 @@ section[data-testid="stSidebar"]{
     font-weight:500;
 }
 
+[data-testid="stAlert"]{
+    background-color:#fdf2f8 !important;
+    color:#9d174d !important;
+    border:1px solid #fbcfe8 !important;
+}
+
 [data-testid="stFileUploader"]{
     background-color:#f9edf2;
     border:2px dashed #e8a4bf;
     border-radius:14px;
     padding:12px;
 }
-            
+
+.stTextInput input{
+    background-color:#fcf4f7 !important;
+    border:1px solid #fbcfe8 !important;
+}
+
 /* Answer Card */
 .answer-card{
     padding:22px;
@@ -242,19 +253,9 @@ if uploaded_file:
 
     st.success("PDF processed successfully.")
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.metric(
-            "Chunks Created",
-            len(sections)
-        )
-
-    with col2:
-        st.metric(
-            "Document",
-            uploaded_file.name
-        )
+    st.caption(
+        f" {uploaded_file.name}"
+    )
 
     st.divider()
 
@@ -263,7 +264,7 @@ if uploaded_file:
     # ------------------------------------------
 
     query = st.text_input(
-        "💬 Ask your PDF anything"
+        "Ask a question about the document"
     )
 
     if query:
@@ -315,7 +316,7 @@ Content:
             unsafe_allow_html=True
         )
 
-        with st.expander("📚 Sources Used"):
+        with st.expander("Sources Used"):
 
             unique_sources = list(
                 dict.fromkeys(sources)
