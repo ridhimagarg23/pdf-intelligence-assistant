@@ -372,14 +372,12 @@ Content:
 
             st.markdown("## Answer")
 
-            st.markdown(
-                f"""
+            st.markdown("""
                 <div class="answer-card">
-                {answer}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
+                """, unsafe_allow_html=True)
+            
+            st.markdown(answer)
 
             with st.expander(
                 "Sources Used"
