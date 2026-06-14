@@ -1,6 +1,9 @@
 
 import streamlit as st
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 from src.parser import extract_document
 from src.chunking import build_sections
 
@@ -370,14 +373,29 @@ Content:
                     context
                 )
 
-            st.markdown("## Answer")
+                st.session_state.chat_history.append(
+                    {
+                        "question": query,
+                        "answer": answer
+                    }
+                )
 
-            st.markdown("""
-                <div class="answer-card">
-                </div>
-                """, unsafe_allow_html=True)
+            st.markdown("## Conversation")
             
-            st.markdown(answer)
+            for chat in st.session_state.chat_history:
+                st.markdown(
+                    f"### 🙋 You\n\n{chat['question']}"
+                )
+                
+                st.markdown(
+                    "### 🤖 Assistant"
+                )
+                
+                st.markdown(
+                    chat["answer"]
+                )
+                
+                st.divider()
 
             with st.expander(
                 "Sources Used"
