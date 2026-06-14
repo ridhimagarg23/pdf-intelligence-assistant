@@ -181,42 +181,55 @@ st.divider()
 # PDF UPLOAD
 # --------------------------------------------------
 
-uploaded_file = st.file_uploader(
-    "Upload PDF",
-    type=["pdf"]
+uploaded_files = st.file_uploader(
+    "Upload PDFs",
+    type=["pdf"],
+    accept_multiple_files=True
 )
 
 import os
 
-if uploaded_file:
+if uploaded_files:
 
     try:
 
-        # -----------------------------
-        # SAVE PDF
-        # -----------------------------
-
         os.makedirs("data", exist_ok=True)
 
-        pdf_path = os.path.join(
-            "data",
-            uploaded_file.name
+        all_document_text = ""
+        all_pdf_names = []
+
+        # -----------------------------
+        # SAVE + PARSE ALL PDFs
+        # -----------------------------
+
+        with st.spinner("Parsing PDFs..."):
+
+            for uploaded_file in uploaded_files:
+
+                pdf_path = os.path.join(
+                    "data",
+                    uploaded_file.name
+                )
+
+                with open(pdf_path, "wb") as f:
+                    f.write(
+                        uploaded_file.getbuffer()
+                    )
+
+                document = extract_document(
+                    pdf_path
+                )
+
+                all_document_text += "\n\n"
+                all_document_text += document
+
+                all_pdf_names.append(
+                    uploaded_file.name
+                )
+
+        st.success(
+            f"{len(uploaded_files)} PDF(s) parsed successfully"
         )
-
-        with open(pdf_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
-        st.success("PDF uploaded successfully")
-
-        # -----------------------------
-        # DOCLING PARSING
-        # -----------------------------
-
-        with st.spinner("Parsing PDF..."):
-
-            document = extract_document(pdf_path)
-
-        st.success("PDF parsed successfully")
 
         # -----------------------------
         # CHUNKING
@@ -224,7 +237,9 @@ if uploaded_file:
 
         with st.spinner("Creating chunks..."):
 
-            sections = build_sections(document)
+            sections = build_sections(
+                all_document_text
+            )
 
         st.success(
             f"Knowledge chunks created: {len(sections)}"
@@ -248,10 +263,14 @@ if uploaded_file:
         # VECTOR STORE
         # -----------------------------
 
+        pdf_signature = "_".join(
+            sorted(all_pdf_names)
+        )
+
         if (
             "index" not in st.session_state
             or st.session_state.get("current_pdf")
-            != uploaded_file.name
+            != pdf_signature
         ):
 
             with st.spinner(
@@ -267,14 +286,18 @@ if uploaded_file:
                     chunk_texts
                 )
 
-                st.session_state.index = create_index(
-                    embeddings
+                st.session_state.index = (
+                    create_index(
+                        embeddings
+                    )
                 )
 
-                st.session_state.sections = sections
+                st.session_state.sections = (
+                    sections
+                )
 
                 st.session_state.current_pdf = (
-                    uploaded_file.name
+                    pdf_signature
                 )
 
         st.success(
@@ -282,8 +305,18 @@ if uploaded_file:
         )
 
         st.caption(
-            f"Current Document: {uploaded_file.name}"
+            f"{len(uploaded_files)} PDFs Loaded"
         )
+
+        with st.expander(
+            "Loaded Documents"
+        ):
+
+            for pdf_name in all_pdf_names:
+
+                st.write(
+                    f"📄 {pdf_name}"
+                )
 
         st.divider()
 
@@ -292,7 +325,7 @@ if uploaded_file:
         # -----------------------------
 
         query = st.text_input(
-            "Ask a question about the document"
+            "Ask a question about the uploaded PDFs"
         )
 
         if query:
@@ -369,4 +402,3 @@ Content:
         )
 
         st.exception(e)
-
