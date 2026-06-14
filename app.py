@@ -337,7 +337,7 @@ if uploaded_files:
                 query,
                 st.session_state.embedding_model,
                 st.session_state.index,
-                top_k=5
+                top_k=10
             )
 
             context = ""

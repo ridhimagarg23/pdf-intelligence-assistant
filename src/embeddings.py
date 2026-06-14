@@ -16,11 +16,11 @@ def create_chunk_texts(sections):
     for sec in sections:
 
         text = f"""
-Heading:
-{sec['heading']}
-
-Content:
-{sec['content']}
+        Section Title:
+        {sec['heading']}
+        
+        Section Content:
+        {sec['content']}
 """
 
         chunk_texts.append(text)

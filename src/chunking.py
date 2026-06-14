@@ -1,25 +1,50 @@
+import re
+
 def build_sections(markdown_text):
 
-    chunks = []
+    sections = []
 
-    chunk_size = 1000
-    overlap = 200
+    pattern = r"^(#+)\s+(.*)$"
 
-    start = 0
-
-    while start < len(markdown_text):
-
-        end = start + chunk_size
-
-        chunk = markdown_text[start:end]
-
-        chunks.append(
-            {
-                "heading": f"Chunk {len(chunks)+1}",
-                "content": chunk
-            }
+    matches = list(
+        re.finditer(
+            pattern,
+            markdown_text,
+            re.MULTILINE
         )
+    )
 
-        start += (chunk_size - overlap)
+    if not matches:
 
-    return chunks
+        return [
+            {
+                "heading": "Document",
+                "content": markdown_text
+            }
+        ]
+
+    for i, match in enumerate(matches):
+
+        heading = match.group(2).strip()
+
+        start = match.end()
+
+        if i + 1 < len(matches):
+            end = matches[i + 1].start()
+        else:
+            end = len(markdown_text)
+
+        content = markdown_text[
+            start:end
+        ].strip()
+
+        if len(content) > 50:
+
+            sections.append(
+                {
+                    "heading": heading,
+                    "content": content
+                }
+            )
+
+    return sections
