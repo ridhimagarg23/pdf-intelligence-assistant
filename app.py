@@ -428,16 +428,16 @@ if uploaded_files:
                     }
                 )
             
-        st.markdown("## Conversation")
-            
-        for message in st.session_state.messages:
-                
-            with st.chat_message(
-                message["role"]
-            ):
-                st.markdown(
-                    message["content"]
-                )
+        st.markdown("## Answer")
+        
+        st.markdown(
+            f"""
+            <div class="answer-card">
+            {answer}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         if query:
 
