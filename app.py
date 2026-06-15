@@ -144,12 +144,11 @@ Upload a PDF and ask natural language questions.
 ### Features
 
 - PDF Parsing
-
 - Semantic Retrieval
-
 - Source Grounding
-
 - AI Answer Generation
+- Multi-PDF Question Answering
+- Source Citations
 """)
 
 
