@@ -134,12 +134,12 @@ Upload a PDF and ask natural language questions.
 
 ### Tech Stack
 
-Docling
-Heading-Aware Semantic Chunking
-BGE-M3 Embeddings
-FAISS Vector Search
-Gemini 2.5 Flash
-Multi-PDF RAG Chatbot
+- Docling
+- Heading-Aware Semantic Chunking
+- BGE-M3 Embeddings
+- FAISS Vector Search
+- Gemini 2.5 Flash
+- Multi-PDF RAG Chatbot
 
 ### Features
 
