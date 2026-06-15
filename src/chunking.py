@@ -34,15 +34,13 @@ def build_sections(markdown_text):
         else:
             end = len(markdown_text)
 
-        content = markdown_text[
-            start:end
-        ].strip()
+        content = markdown_text[start:end].strip()
 
-        if len(content) > 50:
+        if len(content.strip()) > 100:
 
             sections.append(
                 {
-                    "heading": heading,
+                    "heading": f"{heading} | Section {i+1}",
                     "content": content
                 }
             )

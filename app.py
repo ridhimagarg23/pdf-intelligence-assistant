@@ -114,6 +114,22 @@ section[data-testid="stSidebar"]{
 .streamlit-expanderHeader{
     border-radius:10px;
 }
+            
+[data-testid="chatAvatarIcon-user"]{
+    display:none;
+}
+
+[data-testid="chatAvatarIcon-assistant"]{
+    display:none;
+}
+
+[data-testid="stChatMessageAvatarUser"]{
+    display:none;
+}
+
+[data-testid="stChatMessageAvatarAssistant"]{
+    display:none;
+}
 
 </style>
 """, unsafe_allow_html=True)
@@ -313,6 +329,18 @@ if uploaded_files:
             f"{len(uploaded_files)} PDFs Loaded"
         )
 
+        with st.expander(
+            "Loaded Documents"
+        ):
+
+            for pdf_name in all_pdf_names:
+
+                st.write(
+                    f"📄 {pdf_name}"
+                )
+
+        st.divider()
+
         query = ""
         st.markdown("### Suggested Questions")
         
@@ -332,17 +360,6 @@ if uploaded_files:
             if st.button("📝 Create Study Notes"):
                 query = "Create concise study notes from this document"
 
-        with st.expander(
-            "Loaded Documents"
-        ):
-
-            for pdf_name in all_pdf_names:
-
-                st.write(
-                    f"📄 {pdf_name}"
-                )
-
-        st.divider()
 
         # -----------------------------
         # QUESTION INPUT
@@ -361,7 +378,7 @@ if uploaded_files:
                 query,
                 st.session_state.embedding_model,
                 st.session_state.index,
-                top_k=10
+                top_k=6
             )
 
             context = ""
