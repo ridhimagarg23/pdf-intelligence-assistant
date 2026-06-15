@@ -1,8 +1,8 @@
 
 import streamlit as st
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 from src.parser import extract_document
 from src.chunking import build_sections
@@ -134,11 +134,12 @@ Upload a PDF and ask natural language questions.
 
 ### Tech Stack
 
-- Docling
-- Semantic Chunking
-- BGE-M3
-- FAISS
-- Gemini
+Docling
+Heading-Aware Semantic Chunking
+BGE-M3 Embeddings
+FAISS Vector Search
+Gemini 2.5 Flash
+Multi-PDF RAG Chatbot
 
 ### Features
 
@@ -303,6 +304,8 @@ if uploaded_files:
                     pdf_signature
                 )
 
+                st.session_state.messages = []
+
         st.success(
             "Document knowledge base ready"
         )
@@ -310,6 +313,25 @@ if uploaded_files:
         st.caption(
             f"{len(uploaded_files)} PDFs Loaded"
         )
+
+        query = ""
+        st.markdown("### Suggested Questions")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("📄 Summarize Document"):
+                query = "Summarize the uploaded document"
+                
+            if st.button("📚 Key Concepts"):
+                query = "What are the key concepts in this document?"
+                
+        with col2:
+            if st.button("⭐ Important Topics"):
+                query = "List the important topics from this document"
+            
+            if st.button("📝 Create Study Notes"):
+                query = "Create concise study notes from this document"
 
         with st.expander(
             "Loaded Documents"
@@ -327,9 +349,12 @@ if uploaded_files:
         # QUESTION INPUT
         # -----------------------------
 
-        query = st.text_input(
+        user_query = st.text_input(
             "Ask a question about the uploaded PDFs"
         )
+
+        if user_query:
+            query = user_query
 
         if query:
 
@@ -351,17 +376,17 @@ if uploaded_files:
                 )
 
                 context += f"""
-
-Heading:
-{section['heading']}
-
-Content:
-{section['content']}
-
+                Heading:
+                {section['heading']}
+                Content:
+                {section['content']}
 """
 
                 sources.append(
-                    section["heading"]
+                    {
+                        "heading": section["heading"],
+                        "content": section["content"]
+                    }
                 )
 
             with st.spinner(
@@ -373,43 +398,46 @@ Content:
                     context
                 )
 
-                st.session_state.chat_history.append(
+                st.session_state.messages.append(
                     {
-                        "question": query,
-                        "answer": answer
+                        "role": "user",
+                        "content": query
                     }
                 )
 
-            st.markdown("## Conversation")
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": answer
+                    }
+                )
             
-            for chat in st.session_state.chat_history:
-                st.markdown(
-                    f"### 🙋 You\n\n{chat['question']}"
-                )
+        st.markdown("## Conversation")
+            
+        for message in st.session_state.messages:
                 
+            with st.chat_message(
+                message["role"]
+            ):
                 st.markdown(
-                    "### 🤖 Assistant"
+                    message["content"]
                 )
-                
-                st.markdown(
-                    chat["answer"]
-                )
-                
-                st.divider()
+
+        if query:
 
             with st.expander(
                 "Sources Used"
             ):
 
-                unique_sources = list(
-                    dict.fromkeys(sources)
-                )
+                for source in sources:
 
-                for source in unique_sources:
-
-                    st.write(
-                        f"• {source}"
-                    )
+                    with st.expander(
+                        f"{source['heading']}"
+                    ):
+                        
+                        st.write(
+                            source["content"][:500]
+                        )
 
     except Exception as e:
 
