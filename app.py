@@ -428,16 +428,16 @@ if uploaded_files:
                     }
                 )
             
-        st.markdown("## Answer")
-        
-        st.markdown(
-            f"""
-            <div class="answer-card">
-            {answer}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            st.markdown("## Answer")
+            
+            st.markdown(
+                f"""
+                <div class="answer-card">
+                {answer}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
         if query:
 
