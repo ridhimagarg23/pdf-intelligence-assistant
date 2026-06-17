@@ -1,5 +1,7 @@
 # 📄 PDF Intelligence Assistant
 
+🔗 Live Demo: https://huggingface.co/spaces/ridhimagarg23/pdf-intelligence-assistant
+
 PDF Intelligence Assistant is a Retrieval-Augmented Generation (RAG) application that allows users to upload one or multiple PDF documents and ask questions in natural language.
 
 The system extracts information from PDFs, retrieves the most relevant content using semantic search, and generates grounded answers using Gemini.
